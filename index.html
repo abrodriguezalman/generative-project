@@ -2,5 +2,20 @@
 
 <script>
 /*global nn*/
+  let canvas
+  
+  function canvasMaker() {
+    canvas = nn.create('canvas')
+    .resize(nn.width, nn.height)
+    .css('background-color', 'blue')
+    .addTo('body')
+  }
+  
+  function drawStick(){
+    canvas.line(nn.mouseX, 50, nn.mouseX, 80)
+    .css('stroke', 'red')
+  }
 
+  nn.on('load', canvasMaker)
+  nn.on('click', drawStick)
 </script>
