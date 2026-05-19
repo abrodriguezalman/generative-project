@@ -7,7 +7,7 @@
   <style>
     .word {
       animation-name: fadeInOut;
-      animation-duration: 8s;
+      animation-duration: 5s;
       animation-fill-mode: forwards;
     }
 
@@ -159,7 +159,14 @@
       .css('width', `${nn.width-10}px`)
     
     nn.create('p')
-    .content("Sounds of Resistance. CONTENT WARNING: Graphic Descriptions of Violence and Other Sensitive Topics. Beliefs shared here are not the author's own. Proceed with caution.")
+    .content("Sounds of Resistance. CONTENT WARNING: Use of Profanity and other strong language; Graphic Descriptions of Violence and Other Sensitive Topics. Proceed with caution. Beliefs shared here are not the author's own.")
+    .css('color', 'red')
+    .css('font-size', '16px')
+    .css('text-align', 'center')
+    .addTo('#intro-container')
+    
+    nn.create('p')
+    .content("Move the red dial to begin listening.")
     .css('color', 'red')
     .css('font-size', '16px')
     .css('text-align', 'center')
@@ -260,7 +267,7 @@
   function startLyricTimer () {
     setInterval(() => {
       displayLyrics(currentStation)
-    }, 1000);
+    }, 500);
   }
 
 
