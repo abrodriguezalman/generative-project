@@ -4,8 +4,31 @@
     <meta charset="utf-8">
     <title>Untitled</title>
   </head>
+  <style>
+    .word {
+      animation-name: fadeInOut;
+      animation-duration: 8s;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes fadeInOut {
+      0% {
+        opacity: 0;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
   <body>
+    <div id="lyric-container"></div>
     <div id="radio-container"></div>
+    <div id="intro-container"></div>
   </body>
 </html>
 
@@ -16,23 +39,97 @@
   let radioImg
   let canvas
   let currentStation = 0
-  
   const songs = Object.fromEntries(Array.from({
     length: 11 - 1 + 1
   }, (_, i) => [115 + (i * 55), 1 + i]));
-  
   let currSong
-  
+  let nextWordId = 0
+  let activeWords = []
+  let currentKeywords
+  let maxWordsOnScreen = 10
+
+  const lyrics = [
+    ['treaty wont go away', 'skies', 'hearts of mankind', 'abyss',
+      'land', 'honour', '1840', 'self autonomy', 'vengeance', 'justice',
+      'apartheid', '“segregated, seperated, destroyed”', 'system',
+      'Queen of mother England', 'hungry', 'knowledge of self', ' birthright'
+    ],
+    ['Ireland', 'Famine', 'painful', 'armed guard', 'England', 'starved',
+      'lost our history', 'hurting', 'battered', 'frightened', 'memory',
+      'self-destruction', 'killing', 'healing', 'remembering', 'grieving', 'lonely'
+    ],
+    ['Indigenous people', 'shine', 'light', 'we are equal', 'prayers',
+      'illegal', 'Indian', 'lethal', 'past', 'sequel', 'glorious comeback',
+      'warriors of love', 'ancestors', 'heart', 'blood', 'seventh fire',
+      'wake up', 'nations', 'forgiveness', 'bow', 'sparrows', 'hope',
+      'compassion', 'shield', 'path', 'resurrect', 'single mama',
+      'domestic violence', 'terror', 'power', 'alcohol', 'dead', 'war',
+      'dread', 'grandma', 'history', 'victors', 'cowboys',
+      'beautiful races of humanity'
+    ],
+    ['Colonizer', 'you’re guilty', 'ohh'],
+    ['kill us', 'break our spirit', 'threat', 'right', 'illusion',
+      'reality', 'freedom', 'pride', 'dignity', 'truth',
+      'I’ve only lived insanity', 'land', 'slayer', 'slave', 'grave',
+      'world with no tears', 'compassion', 'western culture', 'Cuitlahuac',
+      'crazy horse'
+    ],
+    ['sit down', 'rise', 'surrender or retreat', 'all for all',
+      'empire may fall', 'remedy', 'utopia', 'joyful dancing rebellion',
+      'Africa', 'Latin America', 'social earthquake', 'silenced',
+      'neglected', 'invisible', 'Free Palestine', 'mother', 'culture',
+      'resistance', 'weapons', 'Looting, trampling, colonization',
+      'White Knight'
+    ],
+    ['risen', 'fire', 'buckskin', 'desire', 'color', 'skin', 'kin',
+      'kings', 'culture', 'message', 'depressing', 'home', 'arrowheads',
+      'enemy', 'armor', 'death', 'genocide', 'Red man', 'clan', 'eagle',
+      'strength', 'Big Chief', 'feelings', 'war', 'petty ass beef',
+      'blessed', 'leaders', 'broken', 'public enemy', 'Native', 'prayer'
+    ],
+    ['Dread', 'Terrible', 'God of grace', 'mercy', 'old slave driver',
+      'time is catching up', 'sins', 'haunt you', 'home', 'east',
+      'rasta man', 'no capture land', 'settle and seize', 'Lord America',
+      'Jamaica', 'real African', 'King Ferdinand', 'Columbus', 'Golden plan',
+      'Caribbean', 'Indian', 'paradise', 'plantation', 'ship', 'Queen',
+      'century', 'sufferation', 'reparation', 'take me to the mother land'
+    ],
+    ['name', 'explore', 'bombard', 'fork and knife', 'introduce',
+      'dismember', 'aboriginals', 'countries', 'fuck around', 'Jack',
+      'Andrew Jackson', 'slashed', 'flayed', 'skins', 'thousands',
+      'scalp', 'Indian child', '"Liberty, equality, fraternity"',
+      'Gerboise bleue', 'history', 'greatness', 'massacres', 'mules',
+      '“Jump Jim Crow”', 'shit', 'razor', 'pharynx', 'Middle East',
+      'Beauty and the Beast', 'love', 'monkeys', 'streets', 'risk',
+      'freedom', 'slaves', 'barbarians', 'exterminate', 'oil',
+      'hummus and falafel', 'Palestine', 'Thanksgiving', 'kidnapped',
+      'raping', 'killing', 'civilized world', 'cost', 'God', 'Smallpox',
+      'George Floyd', 'police', 'whip the Blacks', 'capital', 'lions',
+      'KKK', 'dickheads', 'You are the whites'
+    ],
+    ['Fair', 'Pay rent', 'fact', 'belongs to them', 'give it back',
+      'earth', 'burnin’', 'river', 'bloodwood', 'wrecks', 'share', 'dance',
+      'sleep', 'Western Desert', 'cockatoos'
+    ],
+    ['dream', 'She', 'smile', 'tears', 'shores', 'champagne', 'wounds',
+      'sadness', 'heal', 'green', 'mountains', 'breathe', 'God', 'clouds',
+      'left', 'corrupt', 'out', 'Orlando', 'beach', 'grandma',
+      'neighborhood', 'don’t let go of the flag', 'lelolai', 'Hawaii',
+      'careful', 'leave', 'returning', 'my turn', 'jibara', 'fighting',
+      'give up', 'island', 'stayed'
+    ]
+  ]
+
   async function setUp () {
+
+    nn.get('body').css('background-color', 'black')
+
     currSong = new Audio(`songs/track1.mp3`);
-    const url = 'radio.jpeg' 
-    radioImg = await nn.loadImage(url) 
-    
-   // const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth; //replacement for nn.width
-  //const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight; //replacement for nn.height
+    const url = 'radio.jpeg'
+    radioImg = await nn.loadImage(url)
 
     canvas = nn.create('canvas')
-      .resize(radioImg.width, radioImg.height) 
+      .resize(radioImg.width, radioImg.height)
       .css('position', 'absolute')
       .css('left', `${(nn.width - radioImg.width) / 2}px`)
       .css('top', `${(nn.height - radioImg.height) / 2}px`)
@@ -41,13 +138,36 @@
     canvas.drawImage(radioImg, 0, 0)
 
     canvas.strokeStyle = 'red'
+    canvas.lineWidth = 3
     canvas.line(115, 150, 115, 50)
     currSong.play()
     currSong.loop = true
+
+    nn.get('#lyric-container')
+      .css('position', 'absolute')
+      .css('left', '0px')
+      .css('top', '0px')
+      .css('width', `${nn.width}px`)
+      .css('height', `${(nn.height - radioImg.height) / 2}px`)
+    
+    currentKeywords = lyrics[currentStation]
+    
+    nn.get('#intro-container')
+      .css('position', 'absolute')
+      .css('left', '10px')
+      .css('top', `${(nn.height - radioImg.height)}px`)
+      .css('width', `${nn.width-10}px`)
+    
+    nn.create('p')
+    .content("Sounds of Decolonization. CONTENT WARNING: Graphic Descriptions of Violence and Other Sensitive Topics. Beliefs shared here are not the author's own. Proceed with caution.")
+    .css('color', 'red')
+    .css('font-size', '16px')
+    .css('text-align', 'center')
+    .addTo('#intro-container')
   }
-  
+
   const roundToNearest5 = (num) => Math.round(num / 5) * 5;
-  
+
   function draw () {
     if (!nn.mouseDown) return
 
@@ -58,7 +178,7 @@
     canvas.strokeStyle = 'red'
 
     const canvasRect = canvas.getBoundingClientRect();
-    
+
     let x = Math.round(nn.mouseX - canvasRect.left);
 
     if (x < 115) {
@@ -69,27 +189,82 @@
 
     canvas.line(x, 150, x, 50)
     const newStation = roundToNearest5(x)
-    
-    if (newStation !== currentStation){
+
+    if (newStation !== currentStation) {
+      currentStation = newStation
+      if (!(newStation in songs)) {
+        currentKeywords = ['']
+      } else {
+        currentKeywords = lyrics[songs[currentStation] - 1]
+      }
       playMusic(newStation)
     }
   }
 
   function playMusic (station) {
 
-    if (station in songs){
+    if (station in songs) {
       currSong.src = `songs/track${songs[station]}.mp3`
-      currSong.load();      
+      currSong.load();
       currSong.play();
-     // songChanged = true
-    } else{
+    } else {
       currSong.src = 'songs/radio-static.mp3';
-      currSong.load();      
+      currSong.load();
       currSong.play();
-     // songChanged = false
     }
   }
 
+  function displayLyrics () {
+    if (activeWords.length >= maxWordsOnScreen) return
+    if (!currentKeywords.length) return
+
+    const word = nn.random(currentKeywords)
+    const wordId = nextWordId++
+    const wordEl = nn.create('p')
+      .content(`${word}`)
+      .set('id', `word-${wordId}`)
+      .css('position', 'absolute')
+      .css('color', 'red')
+      .css('font-size', '24px')
+      .set('class', 'word')
+
+    randomLocation(wordEl)
+
+    wordEl.addTo('#lyric-container')
+    activeWords.push(wordEl)
+
+    wordEl.addEventListener('animationend', () => {
+      wordEl.remove()
+      const idx = activeWords.indexOf(wordEl)
+      if (idx !== -1) {
+        activeWords.splice(idx, 1)
+      }
+    });
+  }
+
+  function randomLocation (wordEl) {
+    const cont = nn.get('#lyric-container').getBoundingClientRect()
+    const padding = 30
+    const maxX = cont.width - padding
+    const maxY = cont.height - padding
+    x = nn.randomInt(padding, maxX)
+    y = nn.randomInt(padding, maxY)
+
+    wordEl
+      .css('left', `${x}px`)
+      .css('top', `${y}px`)
+      .css('right', `${x}px`)
+      .css('top', `${y}px`)
+  }
+
+  function startLyricTimer () {
+    setInterval(() => {
+      displayLyrics(currentStation)
+    }, 1000);
+  }
+
+
   nn.on('load', setUp)
+  nn.on('load', startLyricTimer)
   nn.on('mousemove', draw)
 </script>
