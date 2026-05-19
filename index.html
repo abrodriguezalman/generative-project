@@ -1,21 +1,87 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <title>Untitled</title>
+  </head>
+  <body>
+    <div id="radio-container"></div>
+  </body>
+</html>
+
 <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
 
 <script>
-/*global nn*/
+  /*global nn*/
+  let radioImg
   let canvas
+  /*let songChanged = false
+  const songs = Object.fromEntries(Array.from({
+    length: 19 - 1 + 1
+  }, (_, i) => [nn.randomInt(115, 665), 1 + i]));
+  let currSong*/
   
-  function canvasMaker() {
+  async function setUp () {
+    currSong = new Audio('songs/radio-static.mp3');
+    const url = 'radio.jpeg'
+    radioImg = await nn.loadImage(url)
+
     canvas = nn.create('canvas')
-    .resize(nn.width, nn.height)
-    .css('background-color', 'blue')
-    .addTo('body')
-  }
-  
-  function drawStick(){
-    canvas.line(nn.mouseX, 50, nn.mouseX, 80)
-    .css('stroke', 'red')
+      .resize(radioImg.width, radioImg.height)
+      .css('position', 'absolute')
+      .css('left', `${(nn.width - radioImg.width) / 2}`)
+      .css('top', `${(nn.height - radioImg.height) / 2}`)
+      .addTo('#radio-container')
+
+    canvas.drawImage(radioImg, 0, 0)
+
+    canvas.strokeStyle = 'red'
+    canvas.line(115, 150, 115, 50)
+    /*currSong.play()
+    currSong.loop = true*/
   }
 
-  nn.on('load', canvasMaker)
-  nn.on('click', drawStick)
+  function draw () {
+    if (!nn.mouseDown) return
+
+    canvas.clear()
+
+    canvas.drawImage(radioImg, 0, 0)
+
+    canvas.strokeStyle = 'red'
+
+    const canvasRect = canvas.getBoundingClientRect();
+    
+    let x = Math.round(nn.mouseX - canvasRect.left);
+
+    if (x < 115) {
+      x = 115; //cap at 115
+    } else if (x > 665) {
+      x = 665; //cap at 300 
+    }
+
+    canvas.line(x, 150, x, 50)
+    //console.log(nn.mouseX)
+    //playMusic()
+  }
+
+  /*function playMusic () {
+
+    if (songs[nn.mouseX] === undefined && songChanged){
+      currSong.src = 'songs/radio-static.mp3';
+      currSong.load();      
+      currSong.play();
+      songChanged = false
+    } else{
+      currSong.src = 'songs/radio-static.mp3'
+      console.log('songs/track1.mp3')
+     // console.log(`songs/track${nn.randomInt(1, 19)}.mp3`)
+      currSong.load();      
+      currSong.play();
+      songChanged = true
+    }
+  }*/
+
+  nn.on('load', setUp)
+  nn.on('mousemove', draw)
 </script>
