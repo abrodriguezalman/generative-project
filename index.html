@@ -28,14 +28,14 @@
     const url = 'radio.jpeg' 
     radioImg = await nn.loadImage(url) 
     
-    const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth; //replacement for nn.width
-  const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight; //replacement for nn.height
+   // const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth; //replacement for nn.width
+  //const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight; //replacement for nn.height
 
     canvas = nn.create('canvas')
-      .resize(radioImg.width, radioImg.height)
+      .resize(radioImg.width, radioImg.height) 
       .css('position', 'absolute')
-      .css('left', `${(width - radioImg.width) / 2}`)
-      .css('top', `${(height - radioImg.height) / 2}`)
+      .css('left', `${(nn.width - radioImg.width) / 2}px`)
+      .css('top', `${(nn.height - radioImg.height) / 2}px`)
       .addTo('#radio-container')
 
     canvas.drawImage(radioImg, 0, 0)
