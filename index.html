@@ -15,15 +15,17 @@
   /*global nn*/
   let radioImg
   let canvas
-  /*let songChanged = false
+  let currentStation = 0
+  
   const songs = Object.fromEntries(Array.from({
-    length: 19 - 1 + 1
-  }, (_, i) => [nn.randomInt(115, 665), 1 + i]));
-  let currSong*/
+    length: 11 - 1 + 1
+  }, (_, i) => [115 + (i * 55), 1 + i]));
+  
+  let currSong
   
   async function setUp () {
-    currSong = new Audio('songs/radio-static.mp3');
-    const url = 'radio.jpeg'
+    currSong = new Audio(`songs/track1.mp3`);
+    const url = 'radio.jpeg' 
     radioImg = await nn.loadImage(url)
 
     canvas = nn.create('canvas')
@@ -37,10 +39,12 @@
 
     canvas.strokeStyle = 'red'
     canvas.line(115, 150, 115, 50)
-    /*currSong.play()
-    currSong.loop = true*/
+    currSong.play()
+    currSong.loop = true
   }
-
+  
+  const roundToNearest5 = (num) => Math.round(num / 5) * 5;
+  
   function draw () {
     if (!nn.mouseDown) return
 
@@ -61,26 +65,27 @@
     }
 
     canvas.line(x, 150, x, 50)
-    //console.log(nn.mouseX)
-    //playMusic()
+    const newStation = roundToNearest5(x)
+    
+    if (newStation !== currentStation){
+      playMusic(newStation)
+    }
   }
 
-  /*function playMusic () {
+  function playMusic (station) {
 
-    if (songs[nn.mouseX] === undefined && songChanged){
+    if (station in songs){
+      currSong.src = `songs/track${songs[station]}.mp3`
+      currSong.load();      
+      currSong.play();
+     // songChanged = true
+    } else{
       currSong.src = 'songs/radio-static.mp3';
       currSong.load();      
       currSong.play();
-      songChanged = false
-    } else{
-      currSong.src = 'songs/radio-static.mp3'
-      console.log('songs/track1.mp3')
-     // console.log(`songs/track${nn.randomInt(1, 19)}.mp3`)
-      currSong.load();      
-      currSong.play();
-      songChanged = true
+     // songChanged = false
     }
-  }*/
+  }
 
   nn.on('load', setUp)
   nn.on('mousemove', draw)
